@@ -3,6 +3,7 @@ package domain
 import (
 	"database/sql"
 	"log"
+	"strings"
 	"time"
 
 	"example.com/hexagonal/errs"
@@ -13,9 +14,17 @@ type CustomerRepositoryDb struct {
 	client *sql.DB
 }
 
-func (d CustomerRepositoryDb) FindAll() ([]Customer, *errs.AppError) {
+func (d CustomerRepositoryDb) FindAll(status string) ([]Customer, *errs.AppError) {
 
 	findAllSql := "select customer_id, name, city, zipcode, date_of_birth, status from customers"
+
+	if strings.EqualFold(status, "active") {
+		findAllSql += " where status=1"
+	}
+
+	if strings.EqualFold(status, "inactive") {
+		findAllSql += " where status=0"
+	}
 
 	rows, err := d.client.Query(findAllSql)
 	if err != nil {
